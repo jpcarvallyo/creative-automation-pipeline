@@ -1,0 +1,10 @@
+{
+  "name": "storage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "echo \"storage: not built yet (stage 3)\""
+  }
+}
