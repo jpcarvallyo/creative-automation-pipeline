@@ -27,6 +27,8 @@ export type RunOutput = {
 export type EngineHealth = {
   ok: boolean;
   generator: "fal.ai" | "mock";
+  falConfigured?: boolean;
+  available?: Array<"fal.ai" | "mock">;
   model?: string;
   storageRoot?: string;
 };
@@ -44,7 +46,11 @@ export async function createRun(brief: unknown): Promise<{ id: string }> {
     body: JSON.stringify(brief),
   });
   const body = await res.json();
-  if (!res.ok) throw new Error(body.error ?? "Failed to create run");
+  if (!res.ok) {
+    const detail =
+      typeof body.details === "object" ? JSON.stringify(body.details) : body.details;
+    throw new Error([body.error ?? "Failed to create run", detail].filter(Boolean).join(": "));
+  }
   return body;
 }
 

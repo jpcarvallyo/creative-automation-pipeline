@@ -1,9 +1,19 @@
 .shell {
   position: relative;
   z-index: 1;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+@media (max-width: 980px) {
+  .shell {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
 }
 
 .topbar {
@@ -26,11 +36,11 @@
 
 .brand {
   margin: 0;
-  font-family: var(--font-brand), "Roboto", "Avenir Next", "Segoe UI", sans-serif;
+  font-family: var(--font-sans-stack);
   font-weight: 700;
-  font-size: clamp(2rem, 4.2vw, 3rem);
-  letter-spacing: -0.03em;
-  line-height: 0.95;
+  font-size: clamp(1.85rem, 3.8vw, 2.65rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .tagline {
@@ -63,6 +73,10 @@
   color: var(--ink-soft);
 }
 
+.statusValue[data-mode="online"] {
+  color: var(--accent-deep);
+}
+
 .statusValue[data-mode="fal.ai"] {
   color: var(--accent-deep);
 }
@@ -76,6 +90,8 @@
   display: grid;
   grid-template-columns: minmax(18rem, var(--rail)) minmax(0, 1fr);
   min-height: 0;
+  height: 100%;
+  overflow: hidden;
   animation: riseIn 0.85s var(--ease) 0.08s both;
 }
 
@@ -83,16 +99,19 @@
   border-right: 1px solid var(--line-soft);
   background: var(--surface);
   backdrop-filter: blur(14px);
-  padding: 1.25rem 1.15rem 2rem;
+  padding: 1.25rem 1.15rem 1rem;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 1rem;
-  min-height: calc(100vh - 6.5rem);
-  position: sticky;
-  top: 0;
-  align-self: start;
-  max-height: 100vh;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.railBody {
+  min-height: 0;
   overflow: auto;
+  padding-right: 0.15rem;
 }
 
 .railHead {
@@ -104,7 +123,7 @@
   margin: 0;
   font-family: var(--font-display-stack);
   font-size: 1.35rem;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.015em;
 }
 
 .railHead p {
@@ -116,12 +135,63 @@
 .railActions {
   display: grid;
   gap: 0.65rem;
-  padding-top: 0.5rem;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--line-soft);
-  position: sticky;
-  bottom: 0;
-  background: linear-gradient(180deg, transparent, rgba(244, 245, 242, 0.92) 28%);
-  padding-bottom: 0.25rem;
+  background: var(--surface);
+}
+
+.modelPicker {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.modelLabel {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.modelSeg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.modelOpt {
+  appearance: none;
+  border: 1px solid var(--line-soft);
+  background: var(--field);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.55rem 0.5rem;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.modelOpt:hover:not(:disabled) {
+  border-color: rgba(11, 110, 79, 0.4);
+}
+
+.modelOpt[data-active="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.modelOpt:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.modelHint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.35;
 }
 
 .runBtn {
@@ -158,24 +228,33 @@
 .stage {
   padding: 1.25rem clamp(1.15rem, 2.5vw, 2rem) 2.5rem;
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 1rem;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
 }
 
 .stageHead {
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: flex-start;
   gap: 1rem;
   flex-wrap: wrap;
+}
+
+.stageHeadText {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
 }
 
 .stageHead h2 {
   margin: 0;
   font-family: var(--font-display-stack);
   font-size: clamp(1.5rem, 2.5vw, 2rem);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.015em;
 }
 
 .meta {
@@ -183,30 +262,95 @@
   font-size: 0.9rem;
 }
 
-.logPanel {
+.logAnchor {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.logBtn {
+  appearance: none;
+  position: relative;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  background: var(--surface-strong);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.logBtn:hover,
+.logBtn[aria-expanded="true"] {
+  border-color: rgba(11, 110, 79, 0.35);
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+}
+
+.logDot {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.logDot[data-status="done"] {
+  background: var(--ok);
+}
+
+.logDot[data-status="failed"] {
+  background: var(--warn);
+}
+
+.logDot[data-status="running"],
+.logDot[data-status="queued"] {
+  background: var(--accent);
+  animation: pulseSoft 1.4s ease-in-out infinite;
+}
+
+.logPopover {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  z-index: 20;
+  width: min(28rem, calc(100vw - 2rem));
   background: var(--surface-strong);
   border: 1px solid var(--line-soft);
-  padding: 0.7rem 0.9rem;
-  max-width: 100%;
+  box-shadow: 0 12px 40px rgba(16, 20, 18, 0.12);
+  padding: 0.75rem 0.85rem 0.85rem;
+  animation: riseIn 0.25s var(--ease) both;
 }
 
-.logPanel[open] {
-  padding-bottom: 0.85rem;
-}
-
-.logPanel summary {
-  cursor: pointer;
-  list-style: none;
+.logPopoverHead {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  font-weight: 650;
-  font-size: 0.9rem;
+  gap: 0.65rem;
+  margin-bottom: 0.55rem;
 }
 
-.logPanel summary::-webkit-details-marker {
-  display: none;
+.logPopoverHead strong {
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.logClose {
+  appearance: none;
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0.15rem 0.25rem;
+}
+
+.logClose:hover {
+  color: var(--ink);
 }
 
 .logBadge {
@@ -230,8 +374,8 @@
 }
 
 .log {
-  margin: 0.7rem 0 0;
-  max-height: 9.5rem;
+  margin: 0;
+  max-height: 14rem;
   overflow: auto;
   white-space: pre-wrap;
   word-break: break-word;
@@ -239,6 +383,18 @@
   font-size: 0.72rem;
   line-height: 1.5;
   color: var(--ink-soft);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .gallery {
@@ -269,8 +425,8 @@
   max-width: 28rem;
   font-family: var(--font-display-stack);
   font-size: clamp(1.9rem, 3.5vw, 2.7rem);
-  letter-spacing: -0.045em;
-  line-height: 1.05;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
 }
 
 .emptyCopy {
@@ -370,14 +526,24 @@
 @media (max-width: 980px) {
   .workspace {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
   }
 
   .rail {
-    position: relative;
-    max-height: none;
-    min-height: 0;
+    height: auto;
+    overflow: visible;
     border-right: 0;
     border-bottom: 1px solid var(--line-soft);
+  }
+
+  .railBody {
+    overflow: visible;
+  }
+
+  .stage {
+    height: auto;
+    overflow: visible;
   }
 
   .card,

@@ -36,7 +36,16 @@ export default function HomePage() {
     async function loadHealth() {
       try {
         const h = await getEngineHealth();
-        if (!cancelled) setHealth(h);
+        if (cancelled) return;
+        setHealth(h);
+        setForm((prev) => {
+          const falOk = h.falConfigured ?? h.generator === "fal.ai";
+          if (prev.generator === "fal.ai" && !falOk) {
+            return { ...prev, generator: "mock" };
+          }
+          if (prev.generator === "fal.ai" || prev.generator === "mock") return prev;
+          return { ...prev, generator: falOk ? "fal.ai" : "mock" };
+        });
       } catch {
         attempts += 1;
         if (!cancelled && attempts < 5) {
@@ -55,10 +64,6 @@ export default function HomePage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (busy) setLogOpen(true);
-  }, [busy]);
-
   const grouped = useMemo(() => {
     const map = new Map<string, RunOutput[]>();
     for (const o of outputs) {
@@ -69,12 +74,8 @@ export default function HomePage() {
     return [...map.entries()];
   }, [outputs]);
 
-  const generatorLabel =
-    health?.generator === "fal.ai"
-      ? `fal.ai · ${health.model ?? "flux"}`
-      : health?.generator === "mock"
-        ? "mock · sharp"
-        : "engine offline";
+  const falAvailable = Boolean(health?.falConfigured ?? health?.generator === "fal.ai");
+  const engineOnline = Boolean(health?.ok);
 
   async function onRun() {
     const generation = ++runGeneration.current;
@@ -131,12 +132,18 @@ export default function HomePage() {
           </p>
         </div>
         <div className={styles.statusCluster}>
-          <p className={styles.statusLabel}>Generator</p>
+          <p className={styles.statusLabel}>Engine</p>
           <p
             className={styles.statusValue}
-            data-mode={busy ? "running" : (health?.generator ?? "unknown")}
+            data-mode={busy ? "running" : engineOnline ? "online" : "unknown"}
           >
-            {busy ? "running pipeline…" : generatorLabel}
+            {busy
+              ? "running pipeline…"
+              : engineOnline
+                ? falAvailable
+                  ? "online · fal ready"
+                  : "online · mock only"
+                : "offline"}
           </p>
         </div>
       </header>
@@ -148,9 +155,45 @@ export default function HomePage() {
             <p>Shape the run. One hero per product, three ratios, brand checks on the way out.</p>
           </div>
 
-          <BriefForm value={form} onChange={setForm} disabled={busy} />
+          <div className={styles.railBody}>
+            <BriefForm value={form} onChange={setForm} disabled={busy} />
+          </div>
 
           <div className={styles.railActions}>
+            <div className={styles.modelPicker}>
+              <p className={styles.modelLabel}>Hero model</p>
+              <div className={styles.modelSeg} role="group" aria-label="Hero model">
+                <button
+                  type="button"
+                  className={styles.modelOpt}
+                  data-active={form.generator === "fal.ai" ? "true" : "false"}
+                  disabled={busy || !falAvailable}
+                  title={
+                    falAvailable
+                      ? "fal.ai FLUX schnell"
+                      : "Set GENAI_API_KEY on the engine to enable fal.ai"
+                  }
+                  onClick={() => setForm((f) => ({ ...f, generator: "fal.ai" }))}
+                >
+                  fal.ai
+                </button>
+                <button
+                  type="button"
+                  className={styles.modelOpt}
+                  data-active={form.generator === "mock" ? "true" : "false"}
+                  disabled={busy}
+                  title="Local sharp placeholder — no API key"
+                  onClick={() => setForm((f) => ({ ...f, generator: "mock" }))}
+                >
+                  Local mock
+                </button>
+              </div>
+              <p className={styles.modelHint}>
+                {form.generator === "fal.ai"
+                  ? `fal.ai · ${health?.model ?? "flux/schnell"}`
+                  : "Local sharp placeholders — zero API cost"}
+              </p>
+            </div>
             {error ? <p className={styles.error}>{error}</p> : null}
             <button type="button" className={styles.runBtn} onClick={onRun} disabled={busy}>
               {busy ? "Generating…" : "Run pipeline"}
@@ -160,34 +203,68 @@ export default function HomePage() {
 
         <section className={styles.stage}>
           <div className={styles.stageHead}>
-            <h2>Creative stage</h2>
-            <span className={styles.meta}>
-              {outputs.length
-                ? `${outputs.length} creatives · ${grouped.length} products`
-                : "No outputs yet"}
-              {run?.brandReport
-                ? ` · brand ${run.brandReport.ok ? "clear" : "flagged"}`
-                : ""}
-            </span>
-          </div>
-
-          <details
-            className={styles.logPanel}
-            open={logOpen}
-            onToggle={(e) => setLogOpen((e.target as HTMLDetailsElement).open)}
-          >
-            <summary>
-              <span>Run log</span>
-              <span className={styles.logBadge} data-status={run?.status ?? "idle"}>
-                {run
-                  ? `${run.status}${run.brandReport ? ` · brand ${run.brandReport.ok ? "OK" : "ISSUES"}` : ""}`
-                  : "idle"}
+            <div className={styles.stageHeadText}>
+              <h2>Creative stage</h2>
+              <span className={styles.meta}>
+                {outputs.length
+                  ? `${outputs.length} creatives · ${grouped.length} products`
+                  : "No outputs yet"}
+                {run?.brandReport
+                  ? ` · brand ${run.brandReport.ok ? "clear" : "flagged"}`
+                  : ""}
               </span>
-            </summary>
-            <pre className={styles.log}>
-              {run?.log?.length ? run.log.join("\n") : "Start a run to stream engine events here."}
-            </pre>
-          </details>
+            </div>
+
+            <div className={styles.logAnchor}>
+              <button
+                type="button"
+                className={styles.logBtn}
+                aria-expanded={logOpen}
+                aria-controls="run-log-panel"
+                title="Run log"
+                onClick={() => setLogOpen((v) => !v)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M4 5h16v2H4V5zm0 6h16v2H4v-2zm0 6h10v2H4v-2z"
+                  />
+                </svg>
+                <span
+                  className={styles.logDot}
+                  data-status={busy ? "running" : (run?.status ?? "idle")}
+                />
+                <span className={styles.srOnly}>Run log</span>
+              </button>
+
+              {logOpen ? (
+                <div id="run-log-panel" className={styles.logPopover} role="dialog" aria-label="Run log">
+                  <div className={styles.logPopoverHead}>
+                    <strong>Run log</strong>
+                    <span className={styles.logBadge} data-status={run?.status ?? "idle"}>
+                      {busy
+                        ? "running"
+                        : run
+                          ? `${run.status}${run.brandReport ? ` · brand ${run.brandReport.ok ? "OK" : "ISSUES"}` : ""}`
+                          : "idle"}
+                    </span>
+                    <button
+                      type="button"
+                      className={styles.logClose}
+                      onClick={() => setLogOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <pre className={styles.log}>
+                    {run?.log?.length
+                      ? run.log.join("\n")
+                      : "Start a run to stream engine events here."}
+                  </pre>
+                </div>
+              ) : null}
+            </div>
+          </div>
 
           <div className={styles.gallery}>
             {grouped.length === 0 ? (
@@ -195,7 +272,7 @@ export default function HomePage() {
                 <p className={styles.emptyTitle}>Awaiting a run</p>
                 <p className={styles.emptyCopy}>
                   Hit Run pipeline and this stage fills with 1:1, 9:16, and 16:9 creatives —
-                  fal.ai when your key is live, sharp mock when it isn’t.
+                  pick fal.ai or Local mock above the run button.
                 </p>
               </div>
             ) : (

@@ -10,7 +10,7 @@ import {
 import { resolveRepoPath } from "../paths.js";
 import type { CampaignBrief, RunOutput } from "../types.js";
 import { deriveCreative, loadOptionalLogo } from "./derive.js";
-import { createImageGenerator, type ImageGenerator } from "./generate.js";
+import { createImageGenerator, resolveGeneratorMode, type ImageGenerator } from "./generate.js";
 import { ASPECT_RATIOS } from "./sizes.js";
 
 export type PipelineDeps = {
@@ -33,7 +33,10 @@ export async function runPipeline(
   brief: CampaignBrief,
   deps: PipelineDeps,
 ): Promise<PipelineResult> {
-  const generator = deps.generator ?? createImageGenerator();
+  const mode = resolveGeneratorMode(brief.generator);
+  const generator = deps.generator ?? createImageGenerator(process.env, mode);
+  deps.log(`Hero generator: ${mode}${brief.generator ? " (requested)" : " (default)"}`);
+
   const logo = await loadOptionalLogo(brief.brand?.logoPath);
   if (brief.brand?.logoPath && !logo) {
     deps.log(`Logo not found at ${brief.brand.logoPath}; continuing without logo`);
@@ -60,7 +63,6 @@ export async function runPipeline(
     const hero = await resolveHero(
       product.assetPath,
       async () => {
-        const mode = process.env.GENAI_API_KEY?.trim() ? "fal.ai" : "mock";
         deps.log(`Generating hero via ${mode} for ${product.id}`);
         return generator.generateHero({
           product,

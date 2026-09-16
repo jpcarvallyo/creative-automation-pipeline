@@ -14,6 +14,7 @@ export type BriefFormState = {
   primaryColor: string;
   prohibitedWords: string;
   logoPath: string;
+  generator: "fal.ai" | "mock";
 };
 
 export const REGION_OPTIONS = [
@@ -52,7 +53,7 @@ export const COLOR_PRESETS = [
 ] as const;
 
 export const ASSET_OPTIONS = [
-  { label: "Generate with GenAI / mock", value: "" },
+  { label: "Generate with selected model", value: "" },
   { label: "Reuse brand logo as hero", value: "examples/assets/logo.png" },
 ] as const;
 
@@ -78,6 +79,7 @@ export const DEFAULT_BRIEF_FORM: BriefFormState = {
   primaryColor: "#0B6E4F",
   prohibitedWords: "guaranteed, miracle, cure",
   logoPath: "examples/assets/logo.png",
+  generator: "fal.ai",
 };
 
 /** Build the JSON brief the engine expects. */
@@ -102,6 +104,7 @@ export function briefFormToPayload(form: BriefFormState) {
     audience: form.audience.trim(),
     message: form.message.trim(),
     products,
+    generator: form.generator,
     brand: {
       primaryColor: form.primaryColor.trim() || undefined,
       prohibitedWords: prohibitedWords.length ? prohibitedWords : undefined,

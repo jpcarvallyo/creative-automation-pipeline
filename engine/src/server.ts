@@ -16,12 +16,16 @@ export function createApp() {
   app.use("/media", express.static(storageRoot));
 
   app.get("/health", (_req, res) => {
-    const generator = process.env.GENAI_API_KEY?.trim() ? "fal.ai" : "mock";
+    const falConfigured = Boolean(process.env.GENAI_API_KEY?.trim());
+    const available = falConfigured ? (["mock", "fal.ai"] as const) : (["mock"] as const);
+    const generator = falConfigured ? "fal.ai" : "mock";
     res.json({
       ok: true,
       storageRoot,
       generator,
-      model: generator === "fal.ai" ? "fal-ai/flux/schnell" : "sharp-placeholder",
+      falConfigured,
+      available,
+      model: falConfigured ? "fal-ai/flux/schnell" : "sharp-placeholder",
     });
   });
 

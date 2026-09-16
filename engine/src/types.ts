@@ -24,6 +24,8 @@ export const CampaignBriefSchema = z.object({
   message: z.string().min(1),
   products: z.array(ProductSchema).min(2),
   brand: BrandSchema,
+  /** Preferred hero generator for this run. Defaults from env when omitted. */
+  generator: z.enum(["fal.ai", "mock"]).optional(),
 });
 
 export type CampaignBrief = z.infer<typeof CampaignBriefSchema>;

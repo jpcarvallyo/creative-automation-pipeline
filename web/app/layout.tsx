@@ -1,24 +1,10 @@
 import type { Metadata } from "next";
-import { Figtree, Roboto, Syne } from "next/font/google";
+import { Figtree } from "next/font/google";
 import "./globals.css";
-
-const display = Syne({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const brand = Roboto({
-  subsets: ["latin"],
-  weight: ["500", "700", "900"],
-  variable: "--font-brand",
-  display: "swap",
-});
 
 const sans = Figtree({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -30,11 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${display.variable} ${brand.variable} ${sans.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={sans.variable} suppressHydrationWarning>
       <body className={sans.className} suppressHydrationWarning>
         {children}
       </body>

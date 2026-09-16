@@ -73,10 +73,27 @@ export class FalImageGenerator implements ImageGenerator {
   }
 }
 
-export function createImageGenerator(env: NodeJS.ProcessEnv = process.env): ImageGenerator {
+export function createImageGenerator(
+  env: NodeJS.ProcessEnv = process.env,
+  preferred?: "fal.ai" | "mock",
+): ImageGenerator {
   const key = env.GENAI_API_KEY?.trim();
-  if (key) return new FalImageGenerator(key);
+  const mode = preferred ?? (key ? "fal.ai" : "mock");
+  if (mode === "fal.ai") {
+    if (!key) {
+      throw new Error("fal.ai selected but GENAI_API_KEY is not set on the engine");
+    }
+    return new FalImageGenerator(key);
+  }
   return new MockImageGenerator();
+}
+
+export function resolveGeneratorMode(
+  preferred: "fal.ai" | "mock" | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): "fal.ai" | "mock" {
+  if (preferred) return preferred;
+  return env.GENAI_API_KEY?.trim() ? "fal.ai" : "mock";
 }
 
 function hashHue(input: string): number {
