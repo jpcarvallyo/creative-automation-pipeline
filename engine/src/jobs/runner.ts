@@ -1,49 +1,46 @@
+import { createAssetStorage } from "storage";
 import { appendLog, getJob, updateJob } from "./store.js";
-import type { RunOutput } from "../types.js";
+import { runPipeline } from "../pipeline/index.js";
 
-/**
- * Stage 1 stub: advances job status and writes placeholder log/outputs.
- * Real pipeline (gen → sharp → brand → storage) lands in stage 2–3.
- */
 export function enqueueRun(jobId: string): void {
   setImmediate(() => {
-    void runStub(jobId);
+    void runJob(jobId);
   });
 }
 
-async function runStub(jobId: string): Promise<void> {
+async function runJob(jobId: string): Promise<void> {
   const job = getJob(jobId);
   if (!job) return;
 
   updateJob(jobId, { status: "running" });
-  appendLog(jobId, "Job started (stub pipeline)");
+  appendLog(jobId, "Job started");
 
   try {
-    const outputs: RunOutput[] = [];
-    const ratios = ["1:1", "9:16", "16:9"] as const;
+    const storage = createAssetStorage();
+    const outputs = await runPipeline(jobId, job.brief, {
+      storage,
+      log: (line) => appendLog(jobId, line),
+    });
 
-    for (const product of job.brief.products) {
-      appendLog(jobId, `Product ${product.id}: resolve/generate hero (stub)`);
-      await sleep(50);
-
-      for (const aspectRatio of ratios) {
-        const path = `stub://${jobId}/${product.id}/${aspectRatio.replace(":", "x")}.png`;
-        outputs.push({ productId: product.id, aspectRatio, path });
-        appendLog(jobId, `Derived ${aspectRatio} for ${product.id} → ${path}`);
-        await sleep(20);
-      }
-    }
-
-    appendLog(jobId, "Brand checks skipped in stage 1 stub");
+    appendLog(jobId, "Brand checks deferred to stage 3");
     updateJob(jobId, { status: "done", outputs });
     appendLog(jobId, "Job done");
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = formatError(err);
     updateJob(jobId, { status: "failed", error: message });
     appendLog(jobId, `Job failed: ${message}`);
   }
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function formatError(err: unknown): string {
+  if (!(err instanceof Error)) return String(err);
+  const anyErr = err as Error & { status?: number; body?: unknown };
+  const parts = [err.message || err.name || "Error"];
+  if (anyErr.status) parts.push(`status=${anyErr.status}`);
+  if (anyErr.body !== undefined) {
+    parts.push(
+      typeof anyErr.body === "string" ? anyErr.body : JSON.stringify(anyErr.body),
+    );
+  }
+  return parts.filter(Boolean).join(" — ");
 }

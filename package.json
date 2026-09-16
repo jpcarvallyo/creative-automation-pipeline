@@ -9,8 +9,10 @@
   ],
   "scripts": {
     "dev:engine": "npm run dev -w engine",
-    "build:engine": "npm run build -w engine",
-    "start:engine": "npm run start -w engine"
+    "build": "npm run build -w storage && npm run build -w engine && npm run build -w cli",
+    "build:engine": "npm run build -w storage && npm run build -w engine",
+    "start:engine": "npm run start -w engine",
+    "cli": "npm run dev -w cli --"
   },
   "engines": {
     "node": ">=20"

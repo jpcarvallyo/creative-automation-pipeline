@@ -18,6 +18,6 @@
   "brand": {
     "primaryColor": "#0B6E4F",
     "prohibitedWords": ["guaranteed", "miracle", "cure"],
-    "logoPath": "assets/logo.png"
+    "logoPath": "examples/assets/logo.png"
   }
 }
