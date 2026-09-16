@@ -49,6 +49,7 @@ runsRouter.get("/:id", (req, res) => {
     log: job.log,
     error: job.error,
     campaignName: job.brief.campaignName,
+    brandReport: job.brandReport,
   });
 });
 
@@ -62,6 +63,7 @@ runsRouter.get("/:id/outputs", (req, res) => {
   res.json({
     id: job.id,
     status: job.status,
+    brandReport: job.brandReport,
     outputs: job.outputs,
   });
 });

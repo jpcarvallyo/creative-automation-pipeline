@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { BrandCheckResult, BrandReport } from "./brand/types.js";
 
 export const ProductSchema = z.object({
   id: z.string().min(1),
@@ -34,6 +35,7 @@ export type RunOutput = {
   productId: string;
   aspectRatio: "1:1" | "9:16" | "16:9";
   path: string;
+  brandChecks?: BrandCheckResult[];
 };
 
 export type RunJob = {
@@ -45,4 +47,7 @@ export type RunJob = {
   log: string[];
   error?: string;
   outputs: RunOutput[];
+  brandReport?: BrandReport;
 };
+
+export type { BrandCheckResult, BrandReport };

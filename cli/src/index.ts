@@ -31,6 +31,7 @@ async function main(): Promise<void> {
   console.log(`Run id: ${id}`);
 
   let status = "queued";
+  let lastLogLen = 0;
   while (status === "queued" || status === "running") {
     await sleep(400);
     const pollRes = await fetch(`${ENGINE_URL}/runs/${id}`);
@@ -38,10 +39,11 @@ async function main(): Promise<void> {
       status: string;
       log: string[];
       error?: string;
+      brandReport?: { ok: boolean };
     };
     status = poll.status;
-    const latest = poll.log[poll.log.length - 1];
-    if (latest) console.log(latest);
+    for (const line of poll.log.slice(lastLogLen)) console.log(line);
+    lastLogLen = poll.log.length;
     if (status === "failed") {
       console.error("Run failed:", poll.error ?? poll.log.join("\n"));
       process.exit(1);
@@ -51,12 +53,34 @@ async function main(): Promise<void> {
   const outRes = await fetch(`${ENGINE_URL}/runs/${id}/outputs`);
   const outBody = (await outRes.json()) as {
     status: string;
-    outputs: { productId: string; aspectRatio: string; path: string }[];
+    brandReport?: {
+      ok: boolean;
+      checks: { id: string; status: string; detail: string }[];
+    };
+    outputs: {
+      productId: string;
+      aspectRatio: string;
+      path: string;
+      brandChecks?: { id: string; status: string; detail: string }[];
+    }[];
   };
 
   console.log("\nOutputs:");
   for (const o of outBody.outputs) {
     console.log(`  ${o.productId}  ${o.aspectRatio}  →  ${o.path}`);
+  }
+
+  if (outBody.brandReport) {
+    console.log(`\nBrand report: ${outBody.brandReport.ok ? "OK" : "ISSUES"}`);
+    const summary = new Map<string, { pass: number; fail: number; skip: number }>();
+    for (const c of outBody.brandReport.checks) {
+      const row = summary.get(c.id) ?? { pass: 0, fail: 0, skip: 0 };
+      row[c.status as "pass" | "fail" | "skip"] += 1;
+      summary.set(c.id, row);
+    }
+    for (const [id, row] of summary) {
+      console.log(`  ${id}: pass=${row.pass} fail=${row.fail} skip=${row.skip}`);
+    }
   }
 }
 

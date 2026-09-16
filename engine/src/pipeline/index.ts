@@ -1,5 +1,12 @@
 import { readFile } from "node:fs/promises";
 import type { AssetStorage } from "storage";
+import {
+  runCopyChecks,
+  runCreativeChecks,
+  summarizeBrandChecks,
+  type BrandCheckResult,
+  type BrandReport,
+} from "../brand/index.js";
 import { resolveRepoPath } from "../paths.js";
 import type { CampaignBrief, RunOutput } from "../types.js";
 import { deriveCreative, loadOptionalLogo } from "./derive.js";
@@ -12,32 +19,53 @@ export type PipelineDeps = {
   log: (line: string) => void;
 };
 
+export type PipelineResult = {
+  outputs: RunOutput[];
+  brandReport: BrandReport;
+};
+
 /**
- * One hero per product → sharp derives all ratios → storage.put.
+ * One hero per product → sharp derives all ratios → brand heuristics → storage.put.
  * Never calls the image model per aspect ratio.
  */
 export async function runPipeline(
   runId: string,
   brief: CampaignBrief,
   deps: PipelineDeps,
-): Promise<RunOutput[]> {
+): Promise<PipelineResult> {
   const generator = deps.generator ?? createImageGenerator();
   const logo = await loadOptionalLogo(brief.brand?.logoPath);
   if (brief.brand?.logoPath && !logo) {
     deps.log(`Logo not found at ${brief.brand.logoPath}; continuing without logo`);
   }
 
+  const brandCtx = {
+    message: brief.message,
+    prohibitedWords: brief.brand?.prohibitedWords,
+    primaryColor: brief.brand?.primaryColor,
+    logo,
+  };
+
+  const allChecks: BrandCheckResult[] = [];
+  const copyChecks = runCopyChecks(brandCtx);
+  allChecks.push(...copyChecks);
+  for (const check of copyChecks) {
+    deps.log(`Brand[${check.id}] ${check.status}: ${check.detail}`);
+  }
+
   const outputs: RunOutput[] = [];
 
   for (const product of brief.products) {
     deps.log(`Product ${product.id}: resolving hero`);
-    const hero = await resolveHero(product.assetPath, () =>
-      generator.generateHero({
-        product,
-        region: brief.region,
-        audience: brief.audience,
-        message: brief.message,
-      }),
+    const hero = await resolveHero(
+      product.assetPath,
+      () =>
+        generator.generateHero({
+          product,
+          region: brief.region,
+          audience: brief.audience,
+          message: brief.message,
+        }),
       deps.log,
       product.id,
     );
@@ -54,15 +82,34 @@ export async function runPipeline(
         aspectRatio,
         logo,
       });
+
+      const creativeChecks = await runCreativeChecks(creative, aspectRatio, brandCtx);
+      allChecks.push(...creativeChecks);
+      for (const check of creativeChecks) {
+        deps.log(
+          `Brand[${check.id}] ${product.id}/${aspectRatio} ${check.status}: ${check.detail}`,
+        );
+      }
+
       const ratioKey = aspectRatio.replace(":", "x");
       const key = `outputs/${runId}/${product.id}/${ratioKey}.png`;
       const storedPath = await deps.storage.put(key, creative, "image/png");
-      outputs.push({ productId: product.id, aspectRatio, path: storedPath });
+      outputs.push({
+        productId: product.id,
+        aspectRatio,
+        path: storedPath,
+        brandChecks: creativeChecks,
+      });
       deps.log(`Saved ${aspectRatio} → ${storedPath}`);
     }
   }
 
-  return outputs;
+  const brandReport = summarizeBrandChecks(allChecks);
+  deps.log(
+    `Brand report: ${brandReport.ok ? "OK" : "ISSUES"} (${allChecks.filter((c) => c.status === "fail").length} fail / ${allChecks.length} checks)`,
+  );
+
+  return { outputs, brandReport };
 }
 
 async function resolveHero(

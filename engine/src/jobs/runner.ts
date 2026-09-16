@@ -17,13 +17,13 @@ async function runJob(jobId: string): Promise<void> {
 
   try {
     const storage = createAssetStorage();
-    const outputs = await runPipeline(jobId, job.brief, {
+    const { outputs, brandReport } = await runPipeline(jobId, job.brief, {
       storage,
       log: (line) => appendLog(jobId, line),
     });
 
-    appendLog(jobId, "Brand checks deferred to stage 3");
-    updateJob(jobId, { status: "done", outputs });
+    // Heuristics are gates/signals — job still completes so operators can review.
+    updateJob(jobId, { status: "done", outputs, brandReport });
     appendLog(jobId, "Job done");
   } catch (err) {
     const message = formatError(err);

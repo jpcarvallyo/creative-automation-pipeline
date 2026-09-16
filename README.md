@@ -25,8 +25,8 @@ Optional real GenAI: set `GENAI_API_KEY` to your fal.ai key in `.env`, restart t
 
 - **Stage 1:** job API  
 - **Stage 2:** image pipeline (fal/mock + sharp) + CLI + local/R2 storage interface  
-- **Stage 3 next:** brand heuristic checks  
-- **Stage 4:** thin Next.js UI  
+- **Stage 3:** brand heuristic checks (words / logo / color)  
+- **Stage 4 next:** thin Next.js UI  
 
 ## Layout
 
