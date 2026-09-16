@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { CampaignBriefSchema } from "../types.js";
 import { enqueueRun } from "../jobs/runner.js";
 import { getJob, putJob } from "../jobs/store.js";
+import { toMediaUrl } from "../mediaUrl.js";
 import type { RunJob } from "../types.js";
 
 export const runsRouter = Router();
@@ -64,6 +65,9 @@ runsRouter.get("/:id/outputs", (req, res) => {
     id: job.id,
     status: job.status,
     brandReport: job.brandReport,
-    outputs: job.outputs,
+    outputs: job.outputs.map((o) => ({
+      ...o,
+      url: toMediaUrl(o.path),
+    })),
   });
 });

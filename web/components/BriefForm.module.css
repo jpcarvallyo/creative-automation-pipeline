@@ -1,0 +1,112 @@
+.form {
+  display: grid;
+  gap: 1rem;
+}
+
+.fieldset {
+  margin: 0;
+  padding: 0.9rem 1rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.fieldset legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.fieldset label {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.fieldset input,
+.fieldset textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  background: #fffcf7;
+  color: var(--ink);
+  font: inherit;
+}
+
+.fieldset textarea {
+  resize: vertical;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 720px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.product {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: rgba(11, 110, 79, 0.03);
+}
+
+.productHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--ink);
+}
+
+.colorRow {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.colorRow input[type="color"] {
+  padding: 0.15rem;
+  height: 2.4rem;
+  cursor: pointer;
+}
+
+.secondaryBtn,
+.linkBtn {
+  margin-top: 0.75rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.linkBtn {
+  margin-top: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fail);
+  padding: 0.2rem 0.4rem;
+}
+
+.linkBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -8,11 +8,16 @@
     "storage"
   ],
   "scripts": {
+    "dev": "concurrently -k -n engine,web -c green,cyan \"npm run dev:engine\" \"npm run dev:web\"",
     "dev:engine": "npm run dev -w engine",
-    "build": "npm run build -w storage && npm run build -w engine && npm run build -w cli",
+    "dev:web": "npm run dev -w web",
+    "build": "npm run build -w storage && npm run build -w engine && npm run build -w cli && npm run build -w web",
     "build:engine": "npm run build -w storage && npm run build -w engine",
     "start:engine": "npm run start -w engine",
     "cli": "npm run dev -w cli --"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   },
   "engines": {
     "node": ">=20"

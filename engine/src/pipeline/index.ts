@@ -59,13 +59,16 @@ export async function runPipeline(
     deps.log(`Product ${product.id}: resolving hero`);
     const hero = await resolveHero(
       product.assetPath,
-      () =>
-        generator.generateHero({
+      async () => {
+        const mode = process.env.GENAI_API_KEY?.trim() ? "fal.ai" : "mock";
+        deps.log(`Generating hero via ${mode} for ${product.id}`);
+        return generator.generateHero({
           product,
           region: brief.region,
           audience: brief.audience,
           message: brief.message,
-        }),
+        });
+      },
       deps.log,
       product.id,
     );
