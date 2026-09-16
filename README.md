@@ -63,7 +63,6 @@ Brand report on `GET /runs/:id` and in the CLI/UI log.
 | Brand checks as signals | Heuristic gates, not verdicts | Hard-fail blocking |
 | Thin Next console | Operator surface only | Auth, dashboards, CMS |
 
-
 ## Assumptions / limitations
 
 - In-memory jobs — lost on process restart  
