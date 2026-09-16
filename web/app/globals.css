@@ -1,14 +1,25 @@
 :root {
-  --bg: #f7f6f3;
-  --ink: #1c1b19;
-  --muted: #6a6560;
-  --line: #d8d2c8;
+  --bg-0: #dde3dd;
+  --bg-1: #eef1ec;
+  --ink: #101412;
+  --ink-soft: #38423c;
+  --muted: #667066;
+  --line: #b7c0b8;
+  --line-soft: rgba(16, 20, 18, 0.1);
+  --surface: rgba(250, 251, 248, 0.72);
+  --surface-strong: rgba(250, 251, 248, 0.92);
+  --field: rgba(255, 255, 255, 0.72);
   --accent: #0b6e4f;
-  --accent-ink: #f4fff9;
-  --fail: #8b2e2e;
+  --accent-deep: #074f39;
+  --accent-soft: rgba(11, 110, 79, 0.14);
+  --accent-ink: #f2fff8;
+  --warn: #9a3d2e;
   --ok: #0b6e4f;
-  --font: var(--font-sans), "Segoe UI", sans-serif;
-  --mono: var(--font-mono), ui-monospace, monospace;
+  /* Resolved on :root — font vars must be on <html> (see layout.tsx). */
+  --font-sans-stack: var(--font-sans), "Avenir Next", "Segoe UI", sans-serif;
+  --font-display-stack: var(--font-display), "Avenir Next", "Segoe UI", sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --rail: 24rem;
 }
 
 * {
@@ -19,18 +30,67 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background: var(--bg);
   color: var(--ink);
-  font-family: var(--font);
+  font-family: var(--font-sans), "Avenir Next", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(1000px 560px at 0% -15%, rgba(11, 110, 79, 0.2), transparent 58%),
+    radial-gradient(820px 520px at 100% 0%, rgba(18, 42, 34, 0.1), transparent 52%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-0));
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+  z-index: 0;
 }
 
 button,
 textarea,
 input,
 select {
-  font: inherit;
+  font-family: var(--font-sans-stack);
 }
 
 a {
   color: var(--accent);
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSoft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
 }

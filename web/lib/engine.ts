@@ -32,7 +32,7 @@ export type EngineHealth = {
 };
 
 export async function getEngineHealth(): Promise<EngineHealth> {
-  const res = await fetch(`${ENGINE_URL}/health`, { cache: "no-store" });
+  const res = await fetch("/api/health", { cache: "no-store" });
   if (!res.ok) throw new Error("Engine health check failed");
   return res.json();
 }

@@ -1,30 +1,41 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Figtree, Roboto, Syne } from "next/font/google";
 import "./globals.css";
 
-const sans = IBM_Plex_Sans({
+const display = Syne({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const brand = Roboto({
+  subsets: ["latin"],
+  weight: ["500", "700", "900"],
+  variable: "--font-brand",
+  display: "swap",
+});
+
+const sans = Figtree({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const mono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "Creative Automation Console",
-  description: "Thin operator console for campaign creative runs",
+  title: "Creative Automation",
+  description: "Operator console for campaign creative runs",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${display.variable} ${brand.variable} ${sans.variable}`}
+      suppressHydrationWarning
+    >
+      <body className={sans.className} suppressHydrationWarning>
         {children}
       </body>
     </html>
