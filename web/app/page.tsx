@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BriefForm } from "@/components/BriefForm";
 import {
   briefFormToPayload,
@@ -26,11 +26,20 @@ export default function HomePage() {
   const [run, setRun] = useState<RunStatus | null>(null);
   const [outputs, setOutputs] = useState<RunOutput[]>([]);
   const [health, setHealth] = useState<EngineHealth | null>(null);
+  const runGeneration = useRef(0);
 
   useEffect(() => {
+    let cancelled = false;
     void getEngineHealth()
-      .then(setHealth)
-      .catch(() => setHealth(null));
+      .then((h) => {
+        if (!cancelled) setHealth(h);
+      })
+      .catch(() => {
+        if (!cancelled) setHealth(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const grouped = useMemo(() => {
@@ -44,6 +53,7 @@ export default function HomePage() {
   }, [outputs]);
 
   async function onRun() {
+    const generation = ++runGeneration.current;
     setError(null);
     setBusy(true);
     setOutputs([]);
@@ -55,12 +65,16 @@ export default function HomePage() {
 
       const brief = briefFormToPayload(form);
       const { id } = await createRun(brief);
+      if (generation !== runGeneration.current) return;
+
       let status: RunStatus["status"] = "queued";
       let latest: RunStatus | null = null;
 
       while (status === "queued" || status === "running") {
         await sleep(500);
+        if (generation !== runGeneration.current) return;
         latest = await getRun(id);
+        if (generation !== runGeneration.current) return;
         setRun(latest);
         status = latest.status;
       }
@@ -70,12 +84,16 @@ export default function HomePage() {
       }
 
       const out = await getOutputs(id);
+      if (generation !== runGeneration.current) return;
       setOutputs(out.outputs);
-      if (latest) setRun({ ...latest, brandReport: out.brandReport ?? latest.brandReport });
+      if (latest) {
+        setRun({ ...latest, brandReport: out.brandReport ?? latest.brandReport });
+      }
     } catch (err) {
+      if (generation !== runGeneration.current) return;
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setBusy(false);
+      if (generation === runGeneration.current) setBusy(false);
     }
   }
 

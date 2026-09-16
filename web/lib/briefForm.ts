@@ -16,6 +16,46 @@ export type BriefFormState = {
   logoPath: string;
 };
 
+export const REGION_OPTIONS = [
+  "US-West",
+  "US-East",
+  "US-Central",
+  "UK",
+  "EU-DE",
+  "EU-FR",
+  "APAC-JP",
+  "APAC-AU",
+  "LATAM-BR",
+  "CA",
+] as const;
+
+export const AUDIENCE_OPTIONS = [
+  "Health-conscious millennials, 25-40",
+  "Gen Z social natives, 18-24",
+  "Parents of young children, 28-45",
+  "Fitness enthusiasts, 22-40",
+  "Value-seeking families",
+  "Premium urban professionals",
+] as const;
+
+export const LOGO_OPTIONS = [
+  { label: "Default brand logo", value: "examples/assets/logo.png" },
+  { label: "None", value: "" },
+] as const;
+
+export const COLOR_PRESETS = [
+  { label: "Brand green", value: "#0B6E4F" },
+  { label: "Ocean blue", value: "#0B4F6C" },
+  { label: "Berry", value: "#6B2D5C" },
+  { label: "Citrus", value: "#C45C26" },
+  { label: "Near black", value: "#1C1B19" },
+] as const;
+
+export const ASSET_OPTIONS = [
+  { label: "Generate with GenAI / mock", value: "" },
+  { label: "Reuse brand logo as hero", value: "examples/assets/logo.png" },
+] as const;
+
 export const DEFAULT_BRIEF_FORM: BriefFormState = {
   campaignName: "Spring Hydration Push",
   region: "US-West",
