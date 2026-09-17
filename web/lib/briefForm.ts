@@ -1,3 +1,5 @@
+import type { HeroModelId } from "./models";
+
 export type ProductForm = {
   id: string;
   name: string;
@@ -14,7 +16,7 @@ export type BriefFormState = {
   primaryColor: string;
   prohibitedWords: string;
   logoPath: string;
-  generator: "fal.ai" | "mock";
+  generator: HeroModelId;
 };
 
 export const REGION_OPTIONS = [

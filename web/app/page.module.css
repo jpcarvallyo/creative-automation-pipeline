@@ -21,7 +21,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 1.5rem;
-  padding: 1.5rem clamp(1.25rem, 3vw, 2.5rem) 1.15rem;
+  padding: 1.25rem 1.15rem 1rem;
   border-bottom: 1px solid var(--line-soft);
   backdrop-filter: blur(10px);
   background: linear-gradient(180deg, rgba(244, 245, 242, 0.9), rgba(244, 245, 242, 0.55));
@@ -138,60 +138,6 @@
   padding-top: 0.75rem;
   border-top: 1px solid var(--line-soft);
   background: var(--surface);
-}
-
-.modelPicker {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.modelLabel {
-  margin: 0;
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.modelSeg {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.35rem;
-}
-
-.modelOpt {
-  appearance: none;
-  border: 1px solid var(--line-soft);
-  background: var(--field);
-  color: var(--ink-soft);
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
-  padding: 0.55rem 0.5rem;
-  cursor: pointer;
-  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
-}
-
-.modelOpt:hover:not(:disabled) {
-  border-color: rgba(11, 110, 79, 0.4);
-}
-
-.modelOpt[data-active="true"] {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-deep);
-}
-
-.modelOpt:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.modelHint {
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--muted);
-  line-height: 1.35;
 }
 
 .runBtn {

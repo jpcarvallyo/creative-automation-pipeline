@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BriefForm } from "@/components/BriefForm";
+import { ModelPicker } from "@/components/ModelPicker";
 import {
   briefFormToPayload,
   DEFAULT_BRIEF_FORM,
@@ -17,6 +18,7 @@ import {
   type RunOutput,
   type RunStatus,
 } from "@/lib/engine";
+import type { HeroModelId } from "@/lib/models";
 import styles from "./page.module.css";
 
 export default function HomePage() {
@@ -160,40 +162,12 @@ export default function HomePage() {
           </div>
 
           <div className={styles.railActions}>
-            <div className={styles.modelPicker}>
-              <p className={styles.modelLabel}>Hero model</p>
-              <div className={styles.modelSeg} role="group" aria-label="Hero model">
-                <button
-                  type="button"
-                  className={styles.modelOpt}
-                  data-active={form.generator === "fal.ai" ? "true" : "false"}
-                  disabled={busy || !falAvailable}
-                  title={
-                    falAvailable
-                      ? "fal.ai FLUX schnell"
-                      : "Set GENAI_API_KEY on the engine to enable fal.ai"
-                  }
-                  onClick={() => setForm((f) => ({ ...f, generator: "fal.ai" }))}
-                >
-                  fal.ai
-                </button>
-                <button
-                  type="button"
-                  className={styles.modelOpt}
-                  data-active={form.generator === "mock" ? "true" : "false"}
-                  disabled={busy}
-                  title="Local sharp placeholder — no API key"
-                  onClick={() => setForm((f) => ({ ...f, generator: "mock" }))}
-                >
-                  Local mock
-                </button>
-              </div>
-              <p className={styles.modelHint}>
-                {form.generator === "fal.ai"
-                  ? `fal.ai · ${health?.model ?? "flux/schnell"}`
-                  : "Local sharp placeholders — zero API cost"}
-              </p>
-            </div>
+            <ModelPicker
+              value={form.generator}
+              falAvailable={falAvailable}
+              disabled={busy}
+              onChange={(id: HeroModelId) => setForm((f) => ({ ...f, generator: id }))}
+            />
             {error ? <p className={styles.error}>{error}</p> : null}
             <button type="button" className={styles.runBtn} onClick={onRun} disabled={busy}>
               {busy ? "Generating…" : "Run pipeline"}
