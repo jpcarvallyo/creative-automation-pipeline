@@ -4,104 +4,40 @@
  *
  * Usage: npm run cli -- [path/to/brief.json]
  */
-import { access, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { formatBrandSummary } from "./brandSummary.js";
+import { resolveBriefPath } from "./resolveBriefPath.js";
+import { runCampaign } from "./runCampaign.js";
 
 const ENGINE_URL = (process.env.ENGINE_URL ?? "http://localhost:3001").replace(/\/$/, "");
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 async function main(): Promise<void> {
-  const briefPath = await resolveBriefPath(process.argv[2]);
+  const briefPath = await resolveBriefPath(process.argv[2], {
+    cwd: process.cwd(),
+    repoRoot: REPO_ROOT,
+  });
   const brief = JSON.parse(await readFile(briefPath, "utf8"));
 
-  console.log(`Submitting brief → ${ENGINE_URL}/runs`);
-  const createRes = await fetch(`${ENGINE_URL}/runs`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(brief),
+  const result = await runCampaign(brief, {
+    engineUrl: ENGINE_URL,
+    fetch,
+    log: (line) => console.log(line),
   });
-  const createBody = (await createRes.json()) as { id?: string; error?: string };
-  if (!createRes.ok || !createBody.id) {
-    console.error("Failed to create run:", createBody);
-    process.exit(1);
-  }
-
-  const id = createBody.id;
-  console.log(`Run id: ${id}`);
-
-  let status = "queued";
-  let lastLogLen = 0;
-  while (status === "queued" || status === "running") {
-    await sleep(400);
-    const pollRes = await fetch(`${ENGINE_URL}/runs/${id}`);
-    const poll = (await pollRes.json()) as {
-      status: string;
-      log: string[];
-      error?: string;
-      brandReport?: { ok: boolean };
-    };
-    status = poll.status;
-    for (const line of poll.log.slice(lastLogLen)) console.log(line);
-    lastLogLen = poll.log.length;
-    if (status === "failed") {
-      console.error("Run failed:", poll.error ?? poll.log.join("\n"));
-      process.exit(1);
-    }
-  }
-
-  const outRes = await fetch(`${ENGINE_URL}/runs/${id}/outputs`);
-  const outBody = (await outRes.json()) as {
-    status: string;
-    brandReport?: {
-      ok: boolean;
-      checks: { id: string; status: string; detail: string }[];
-    };
-    outputs: {
-      productId: string;
-      aspectRatio: string;
-      path: string;
-      brandChecks?: { id: string; status: string; detail: string }[];
-    }[];
-  };
 
   console.log("\nOutputs:");
-  for (const o of outBody.outputs) {
+  for (const o of result.outputs) {
     console.log(`  ${o.productId}  ${o.aspectRatio}  →  ${o.path}`);
   }
 
-  if (outBody.brandReport) {
-    console.log(`\nBrand report: ${outBody.brandReport.ok ? "OK" : "ISSUES"}`);
-    const summary = new Map<string, { pass: number; fail: number; skip: number }>();
-    for (const c of outBody.brandReport.checks) {
-      const row = summary.get(c.id) ?? { pass: 0, fail: 0, skip: 0 };
-      row[c.status as "pass" | "fail" | "skip"] += 1;
-      summary.set(c.id, row);
-    }
-    for (const [id, row] of summary) {
-      console.log(`  ${id}: pass=${row.pass} fail=${row.fail} skip=${row.skip}`);
+  if (result.brandReport) {
+    console.log("");
+    for (const line of formatBrandSummary(result.brandReport)) {
+      console.log(line);
     }
   }
-}
-
-async function resolveBriefPath(arg: string | undefined): Promise<string> {
-  const candidates = arg
-    ? [path.resolve(process.cwd(), arg), path.resolve(REPO_ROOT, arg)]
-    : [path.resolve(REPO_ROOT, "examples/brief.json")];
-
-  for (const candidate of candidates) {
-    try {
-      await access(candidate);
-      return candidate;
-    } catch {
-      /* try next */
-    }
-  }
-  throw new Error(`Brief not found. Tried: ${candidates.join(", ")}`);
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 main().catch((err) => {

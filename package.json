@@ -15,7 +15,7 @@
     "build:engine": "npm run build -w storage && npm run build -w engine",
     "start:engine": "npm run start -w engine",
     "cli": "npm run dev -w cli --",
-    "test": "npm run test -w storage && npm run test -w engine"
+    "test": "npm run test -w storage && npm run test -w engine && npm run test -w cli && npm run test -w web"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

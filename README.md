@@ -76,7 +76,10 @@ Brand report on `GET /runs/:id` and in the CLI/UI log.
 npm test
 ```
 
-Covers storage path-traversal guards and prohibited-word brand checks (`node:test` via `tsx`).
+- **engine** — brief validation, generator selection, mock heroes, sharp derive sizes, brand heuristics, full mock `runPipeline`
+- **storage** — path-traversal guards
+- **cli** — brief path resolution, brand summary formatting, HTTP client with mocked `fetch`
+- **web** — form validation/payload mapping, model catalog search, `createRun` client errors
 
 ## Production hardening (not in POC)
 
