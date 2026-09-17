@@ -17,10 +17,21 @@ export class LocalDiskStorage implements AssetStorage {
     return readFile(this.resolve(key));
   }
 
+  /**
+   * Resolve a storage key under rootDir. Rejects `..` escapes
+   * (product ids flow into keys — treat them as untrusted).
+   */
   private resolve(key: string): string {
+    const root = path.resolve(this.rootDir);
     const normalized = key.replace(/^\/+/, "");
-    const full = path.resolve(this.rootDir, normalized);
-    if (!full.startsWith(path.resolve(this.rootDir))) {
+    const full = path.resolve(root, normalized);
+    const relative = path.relative(root, full);
+    if (
+      relative === "" ||
+      relative.startsWith(`..${path.sep}`) ||
+      relative === ".." ||
+      path.isAbsolute(relative)
+    ) {
       throw new Error(`Invalid storage key: ${key}`);
     }
     return full;

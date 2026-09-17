@@ -70,6 +70,14 @@ Brand report on `GET /runs/:id` and in the CLI/UI log.
 - Localization = message text swap only  
 - R2 backend is implemented but not required for the demo  
 
+## Tests
+
+```bash
+npm test
+```
+
+Covers storage path-traversal guards and prohibited-word brand checks (`node:test` via `tsx`).
+
 ## Production hardening (not in POC)
 
 - Durable job queue + object storage by default  
