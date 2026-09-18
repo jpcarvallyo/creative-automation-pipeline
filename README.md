@@ -4,7 +4,7 @@ POC for the Adobe Forward Deployed Engineer take-home.
 
 Operators fill out a campaign brief. The system produces social creatives in 1:1, 9:16, and 16:9, overlays the campaign message, runs a few brand checks, and writes the files to disk. If a product points at an existing local asset, that hero is reused; otherwise a new one is generated (fal.ai when you set a key, sharp placeholders when you don't).
 
-**Demo (2–3 min):** [Loom walkthrough](https://www.loom.com/share/fc860a91d6c74ebfbd1c5b860dc1d0be)
+**Demo (5 min):** [Loom walkthrough](https://www.loom.com/share/fc860a91d6c74ebfbd1c5b860dc1d0be)
 
 ## Run it
 
