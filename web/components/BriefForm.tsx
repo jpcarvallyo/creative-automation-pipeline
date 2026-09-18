@@ -6,6 +6,10 @@ import {
   COLOR_PRESETS,
   LOGO_OPTIONS,
   REGION_OPTIONS,
+  assetPathFromHeroSourceSelect,
+  heroSourceSelectValue,
+  logoPathFromSelect,
+  logoSelectValue,
   type BriefFormState,
   type ProductForm,
 } from "@/lib/briefForm";
@@ -49,9 +53,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
   const audienceMode = (AUDIENCE_OPTIONS as readonly string[]).includes(value.audience)
     ? value.audience
     : CUSTOM;
-  const logoMode = LOGO_OPTIONS.some((o) => o.value === value.logoPath)
-    ? value.logoPath
-    : CUSTOM;
+  const logoMode = logoSelectValue(value.logoPath, CUSTOM);
   const colorMode = COLOR_PRESETS.some(
     (o) => o.value.toLowerCase() === value.primaryColor.toLowerCase(),
   )
@@ -141,9 +143,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
         <h3 className={styles.sectionTitle}>Products</h3>
         <p className={styles.hint}>At least two. Choose generate or reuse an asset per product.</p>
         {value.products.map((product, index) => {
-          const assetMode = ASSET_OPTIONS.some((o) => o.value === product.assetPath)
-            ? product.assetPath
-            : CUSTOM;
+          const assetMode = heroSourceSelectValue(product.assetPath, CUSTOM);
           return (
             <div key={index} className={styles.product}>
               <div className={styles.productHead}>
@@ -191,8 +191,9 @@ export function BriefForm({ value, onChange, disabled }: Props) {
                   disabled={disabled}
                   value={assetMode}
                   onChange={(e) => {
-                    const next = e.target.value;
-                    updateProduct(index, { assetPath: next === CUSTOM ? "" : next });
+                    updateProduct(index, {
+                      assetPath: assetPathFromHeroSourceSelect(e.target.value, CUSTOM),
+                    });
                   }}
                 >
                   {ASSET_OPTIONS.map((opt) => (
@@ -268,8 +269,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
               disabled={disabled}
               value={logoMode}
               onChange={(e) => {
-                const next = e.target.value;
-                patch({ logoPath: next === CUSTOM ? "" : next });
+                patch({ logoPath: logoPathFromSelect(e.target.value, CUSTOM) });
               }}
             >
               {LOGO_OPTIONS.map((opt) => (

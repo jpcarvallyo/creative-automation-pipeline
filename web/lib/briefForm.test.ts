@@ -1,11 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  ASSET_GENERATE,
+  CUSTOM_PATH_SEED,
+  LOGO_NONE,
+  assetPathFromHeroSourceSelect,
   briefFormToPayload,
   DEFAULT_BRIEF_FORM,
+  heroSourceSelectValue,
+  logoPathFromSelect,
+  logoSelectValue,
   validateBriefForm,
   type BriefFormState,
 } from "./briefForm.js";
+
+const CUSTOM = "__custom__";
 
 describe("validateBriefForm", () => {
   it("accepts the default sample form", () => {
@@ -37,6 +46,32 @@ describe("validateBriefForm", () => {
       products: [{ id: "only", name: "One", description: "", assetPath: "" }],
     };
     assert.match(validateBriefForm(form) ?? "", /two products/);
+  });
+});
+
+describe("hero / logo select mapping", () => {
+  it("keeps Custom selected instead of collapsing to Generate", () => {
+    assert.equal(heroSourceSelectValue("", CUSTOM), ASSET_GENERATE);
+    assert.equal(
+      heroSourceSelectValue("examples/assets/logo.png", CUSTOM),
+      "examples/assets/logo.png",
+    );
+    assert.equal(heroSourceSelectValue(CUSTOM_PATH_SEED, CUSTOM), CUSTOM);
+    assert.equal(heroSourceSelectValue("examples/assets/hero.png", CUSTOM), CUSTOM);
+
+    assert.equal(assetPathFromHeroSourceSelect(ASSET_GENERATE, CUSTOM), "");
+    assert.equal(assetPathFromHeroSourceSelect(CUSTOM, CUSTOM), CUSTOM_PATH_SEED);
+    assert.equal(
+      assetPathFromHeroSourceSelect("examples/assets/logo.png", CUSTOM),
+      "examples/assets/logo.png",
+    );
+  });
+
+  it("keeps Custom logo selected instead of collapsing to None", () => {
+    assert.equal(logoSelectValue("", CUSTOM), LOGO_NONE);
+    assert.equal(logoSelectValue(CUSTOM_PATH_SEED, CUSTOM), CUSTOM);
+    assert.equal(logoPathFromSelect(LOGO_NONE, CUSTOM), "");
+    assert.equal(logoPathFromSelect(CUSTOM, CUSTOM), CUSTOM_PATH_SEED);
   });
 });
 

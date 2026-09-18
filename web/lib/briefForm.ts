@@ -41,9 +41,15 @@ export const AUDIENCE_OPTIONS = [
   "Premium urban professionals",
 ] as const;
 
+/** Select-only sentinels — never sent to the engine as paths. */
+export const ASSET_GENERATE = "__generate__";
+export const LOGO_NONE = "__none__";
+/** Seed path so "Custom path…" stays selected until the user edits it. */
+export const CUSTOM_PATH_SEED = "examples/assets/";
+
 export const LOGO_OPTIONS = [
   { label: "Default brand logo", value: "examples/assets/logo.png" },
-  { label: "None", value: "" },
+  { label: "None", value: LOGO_NONE },
 ] as const;
 
 export const COLOR_PRESETS = [
@@ -55,9 +61,38 @@ export const COLOR_PRESETS = [
 ] as const;
 
 export const ASSET_OPTIONS = [
-  { label: "Generate with selected model", value: "" },
+  { label: "Generate with selected model", value: ASSET_GENERATE },
   { label: "Reuse brand logo as hero", value: "examples/assets/logo.png" },
 ] as const;
+
+/** Map stored assetPath → <select> value (generate | preset | custom sentinel). */
+export function heroSourceSelectValue(
+  assetPath: string,
+  customSentinel: string,
+): string {
+  if (assetPath === "") return ASSET_GENERATE;
+  if (ASSET_OPTIONS.some((o) => o.value === assetPath)) return assetPath;
+  return customSentinel;
+}
+
+/** Map <select> choice → stored assetPath ("" means generate). */
+export function assetPathFromHeroSourceSelect(selectValue: string, customSentinel: string): string {
+  if (selectValue === ASSET_GENERATE) return "";
+  if (selectValue === customSentinel) return CUSTOM_PATH_SEED;
+  return selectValue;
+}
+
+export function logoSelectValue(logoPath: string, customSentinel: string): string {
+  if (logoPath === "") return LOGO_NONE;
+  if (LOGO_OPTIONS.some((o) => o.value === logoPath)) return logoPath;
+  return customSentinel;
+}
+
+export function logoPathFromSelect(selectValue: string, customSentinel: string): string {
+  if (selectValue === LOGO_NONE) return "";
+  if (selectValue === customSentinel) return CUSTOM_PATH_SEED;
+  return selectValue;
+}
 
 export const DEFAULT_BRIEF_FORM: BriefFormState = {
   campaignName: "Spring Hydration Push",
