@@ -49,6 +49,7 @@ export const CUSTOM_PATH_SEED = "examples/assets/";
 
 export const LOGO_OPTIONS = [
   { label: "Default brand logo", value: "examples/assets/logo.png" },
+  { label: "Vitality Harvest logo", value: "examples/assets/vitality-harvest-logo.jpg" },
   { label: "None", value: LOGO_NONE },
 ] as const;
 
@@ -63,6 +64,7 @@ export const COLOR_PRESETS = [
 export const ASSET_OPTIONS = [
   { label: "Generate with selected model", value: ASSET_GENERATE },
   { label: "Reuse brand logo as hero", value: "examples/assets/logo.png" },
+  { label: "Reuse Vitality Harvest logo", value: "examples/assets/vitality-harvest-logo.jpg" },
 ] as const;
 
 /** Map stored assetPath → <select> value (generate | preset | custom sentinel). */

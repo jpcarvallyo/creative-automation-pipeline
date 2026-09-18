@@ -73,7 +73,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
               onChange={(e) => patch({ campaignName: e.target.value })}
             />
           </label>
-          <label className={styles.field}>
+          <div className={styles.field}>
             <span>Region / market</span>
             <select
               disabled={disabled}
@@ -99,9 +99,9 @@ export function BriefForm({ value, onChange, disabled }: Props) {
                 onChange={(e) => patch({ region: e.target.value })}
               />
             ) : null}
-          </label>
+          </div>
         </div>
-        <label className={styles.field}>
+        <div className={styles.field}>
           <span>Audience</span>
           <select
             disabled={disabled}
@@ -127,7 +127,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
               onChange={(e) => patch({ audience: e.target.value })}
             />
           ) : null}
-        </label>
+        </div>
         <label className={styles.field}>
           <span>Campaign message</span>
           <textarea
@@ -185,7 +185,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
                   onChange={(e) => updateProduct(index, { description: e.target.value })}
                 />
               </label>
-              <label className={styles.field}>
+              <div className={styles.field}>
                 <span>Hero source</span>
                 <select
                   disabled={disabled}
@@ -212,7 +212,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
                     onChange={(e) => updateProduct(index, { assetPath: e.target.value })}
                   />
                 ) : null}
-              </label>
+              </div>
             </div>
           );
         })}
@@ -229,7 +229,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Brand</h3>
         <div className={styles.grid2}>
-          <label className={styles.field}>
+          <div className={styles.field}>
             <span>Primary color</span>
             <select
               disabled={disabled}
@@ -262,8 +262,8 @@ export function BriefForm({ value, onChange, disabled }: Props) {
                 onChange={(e) => patch({ primaryColor: e.target.value })}
               />
             </div>
-          </label>
-          <label className={styles.field}>
+          </div>
+          <div className={styles.field}>
             <span>Logo</span>
             <select
               disabled={disabled}
@@ -288,7 +288,7 @@ export function BriefForm({ value, onChange, disabled }: Props) {
                 onChange={(e) => patch({ logoPath: e.target.value })}
               />
             ) : null}
-          </label>
+          </div>
         </div>
         <label className={styles.field}>
           <span>Prohibited words (comma-separated)</span>
